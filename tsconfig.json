@@ -1,0 +1,3 @@
+{
+  "extends": "@share-files/config/tsconfig.base.json"
+}
