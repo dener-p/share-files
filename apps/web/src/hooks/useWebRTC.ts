@@ -1,7 +1,10 @@
 import { createEffect, createSignal, onCleanup } from "solid-js";
-import { WebRTCManager } from "../lib/webrtc";
-import type { PeerState, Phase, ReceivedFile } from "../types/WebRTC-types";
+import type { PeerState, ReceivedFile } from "../types/WebRTC-types";
 
+export const SIGNALING_URL =
+  typeof window !== "undefined" && window.location.hostname === "share.puhl.dev"
+    ? "wss://api-share.puhl.dev/ws"
+    : "ws://localhost:3000/ws";
 // hooks/useWebRTC.ts
 import { PeerManager } from "../lib/peer-maneger.ts";
 
@@ -30,7 +33,7 @@ export function useWebRTC(targetId?: string) {
   }
 
   createEffect(() => {
-    ws = new WebSocket("ws://localhost:3000/ws");
+    ws = new WebSocket(SIGNALING_URL);
 
     const sendSignal = (msg: any) => {
       ws.send(JSON.stringify(msg));
