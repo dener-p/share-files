@@ -1,117 +1,122 @@
-export const SIGNALING_URL = typeof window !== "undefined" && window.location.hostname === "share.puhl.dev" 
-  ? "wss://api-share.puhl.dev/ws" 
-  : "ws://localhost:3000/ws";
-
-export type SignalMessage = {
-  type: string;
-  id?: string;
-  to?: string;
-  from?: string;
-  offer?: RTCSessionDescriptionInit;
-  answer?: RTCSessionDescriptionInit;
-  candidate?: RTCIceCandidateInit;
-};
-
 export class WebRTCManager {
-  public peerConnection: RTCPeerConnection;
-  public dataChannel?: RTCDataChannel;
-  private ws: WebSocket;
-  public myId: string = "";
-  
-  public onConnectionStateChange?: (state: RTCPeerConnectionState) => void;
-  public onDataChannelOpen?: () => void;
-  public onMessage?: (data: ArrayBuffer | string) => void;
-  public onIdAssign?: (id: string) => void;
+  pc: RTCPeerConnection;
+  dc?: RTCDataChannel;
 
-  constructor(private targetPeerId?: string) {
-    this.peerConnection = new RTCPeerConnection({
+  onProgress?: (p: number) => void;
+  onReceive?: (file: { name: string; size: number; blob: Blob }) => void;
+  onOpen?: () => void;
+
+  private chunks: ArrayBuffer[] = [];
+  private meta: { name: string; size: number } | null = null;
+  private received = 0;
+
+  constructor(
+    private sendSignal: (msg: any) => void,
+    private isSender: boolean,
+  ) {
+    this.pc = new RTCPeerConnection({
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
 
-    this.peerConnection.onicecandidate = (event) => {
-      if (event.candidate && this.targetPeerId) {
-        this.sendSignal({
-          type: "candidate",
-          to: this.targetPeerId,
-          candidate: event.candidate,
-        });
+    this.pc.onicecandidate = (e) => {
+      if (e.candidate) {
+        this.sendSignal({ type: "ice", candidate: e.candidate });
       }
     };
 
-    this.peerConnection.onconnectionstatechange = () => {
-      this.onConnectionStateChange?.(this.peerConnection.connectionState);
-    };
-
-    if (!targetPeerId) {
-      // Sender: Create the data channel
-      this.dataChannel = this.peerConnection.createDataChannel("file-transfer");
-      this.setupDataChannel();
-    } else {
-      // Receiver: Wait for the data channel
-      this.peerConnection.ondatachannel = (event) => {
-        this.dataChannel = event.channel;
-        this.setupDataChannel();
-      };
-    }
-
-    this.ws = new WebSocket(SIGNALING_URL);
-    this.ws.onmessage = this.handleSignal.bind(this);
-  }
-
-  private setupDataChannel() {
-    if (!this.dataChannel) return;
-    this.dataChannel.binaryType = "arraybuffer";
-    this.dataChannel.onopen = () => this.onDataChannelOpen?.();
-    this.dataChannel.onmessage = (event) => {
-      this.onMessage?.(event.data);
-    };
-  }
-
-  private sendSignal(msg: SignalMessage) {
-    if (this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(msg));
-    } else {
-      this.ws.addEventListener("open", () => {
-        this.ws.send(JSON.stringify(msg));
-      }, { once: true });
+    if (!isSender) {
+      this.pc.ondatachannel = (e) => this.setupReceiver(e.channel);
     }
   }
 
-  private async handleSignal(event: MessageEvent) {
-    const msg: SignalMessage = JSON.parse(event.data);
+  // ── sender ─────────────────────────
+  createDataChannel() {
+    this.dc = this.pc.createDataChannel("file");
+    this.dc.binaryType = "arraybuffer";
 
-    if (msg.type === "id" && msg.id) {
-      this.myId = msg.id;
-      this.onIdAssign?.(this.myId);
+    this.dc.onopen = () => this.onOpen?.();
+  }
 
-      // If we are the receiver, initiate the offer once we get our ID
-      if (this.targetPeerId) {
-        const offer = await this.peerConnection.createOffer();
-        await this.peerConnection.setLocalDescription(offer);
-        this.sendSignal({ type: "offer", to: this.targetPeerId, offer });
+  async sendFile(file: File, chunkSize: number) {
+    if (!this.dc) throw new Error("No data channel");
+
+    this.dc.send(JSON.stringify({ name: file.name, size: file.size }));
+
+    let offset = 0;
+    const reader = new FileReader();
+
+    const sendNext = () => {
+      const slice = file.slice(offset, offset + chunkSize);
+      reader.readAsArrayBuffer(slice);
+    };
+
+    reader.onload = (e) => {
+      const buffer = e.target?.result as ArrayBuffer;
+      this.dc!.send(buffer);
+
+      offset += buffer.byteLength;
+      this.onProgress?.(Math.round((offset / file.size) * 100));
+
+      if (offset < file.size) {
+        if (this.dc!.bufferedAmount > chunkSize * 8) {
+          setTimeout(sendNext, 50);
+        } else {
+          sendNext();
+        }
       }
-    } else if (msg.type === "offer" && msg.offer) {
-      this.targetPeerId = msg.from; // Sender learns receiver's ID
-      await this.peerConnection.setRemoteDescription(new RTCSessionDescription(msg.offer));
-      const answer = await this.peerConnection.createAnswer();
-      await this.peerConnection.setLocalDescription(answer);
-      this.sendSignal({ type: "answer", to: this.targetPeerId, answer });
-    } else if (msg.type === "answer" && msg.answer) {
-      await this.peerConnection.setRemoteDescription(new RTCSessionDescription(msg.answer));
-    } else if (msg.type === "candidate" && msg.candidate) {
-      await this.peerConnection.addIceCandidate(new RTCIceCandidate(msg.candidate));
-    }
+    };
+
+    sendNext();
   }
 
-  public send(data: string | ArrayBuffer) {
-    if (this.dataChannel?.readyState === "open") {
-      this.dataChannel.send(data);
-    }
+  // ── receiver ───────────────────────
+  private setupReceiver(channel: RTCDataChannel) {
+    this.dc = channel;
+    this.dc.binaryType = "arraybuffer";
+
+    this.dc.onmessage = (ev) => {
+      if (typeof ev.data === "string") {
+        this.meta = JSON.parse(ev.data);
+        return;
+      }
+
+      this.chunks.push(ev.data);
+      this.received += ev.data.byteLength;
+
+      if (this.meta) {
+        this.onProgress?.(Math.round((this.received / this.meta.size) * 100));
+
+        if (this.received >= this.meta.size) {
+          const blob = new Blob(this.chunks);
+          this.onReceive?.({
+            name: this.meta.name,
+            size: this.meta.size,
+            blob,
+          });
+        }
+      }
+    };
   }
-  
-  public close() {
-    this.dataChannel?.close();
-    this.peerConnection.close();
-    this.ws.close();
+
+  // ── signaling ──────────────────────
+  async createOffer() {
+    const offer = await this.pc.createOffer();
+    await this.pc.setLocalDescription(offer);
+    return offer;
+  }
+
+  async handleOffer(sdp: RTCSessionDescriptionInit) {
+    await this.pc.setRemoteDescription(new RTCSessionDescription(sdp));
+    const answer = await this.pc.createAnswer();
+    await this.pc.setLocalDescription(answer);
+    return answer;
+  }
+
+  async handleAnswer(sdp: RTCSessionDescriptionInit) {
+    await this.pc.setRemoteDescription(new RTCSessionDescription(sdp));
+  }
+
+  async addIce(candidate: RTCIceCandidateInit) {
+    await this.pc.addIceCandidate(new RTCIceCandidate(candidate));
   }
 }

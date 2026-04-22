@@ -3,6 +3,10 @@ import { cors } from "@elysiajs/cors";
 import type { ElysiaWS } from "elysia/ws";
 
 const clients = new Map<string, ElysiaWS>();
+type msgType = {
+  type: "join";
+  to?: string;
+};
 
 const app = new Elysia()
   .use(
@@ -12,32 +16,42 @@ const app = new Elysia()
   )
   .ws("/ws", {
     open(ws) {
-      const id = crypto.randomUUID();
-      clients.set(id, ws);
-      ws.data = { id };
-      console.log(`connected at ${id}`);
-
-      ws.send(JSON.stringify({ type: "id", id }));
+      console.log(`connected at ${ws.id}`);
+      clients.set(ws.id, ws);
+      ws.send(JSON.stringify({ type: "id", id: ws.id }));
     },
 
-    message(ws, raw) {
-      const msg = JSON.parse(raw.toString());
-      const from = ws.data.id;
+    message(ws) {
+      const from = ws.id;
+      const msg = ws.body as msgType;
 
-      console.log({ msg: msg });
-      if (msg.to && clients.has(msg.to)) {
-        console.log(`message send from ${from} to ${msg.to}`);
-        clients.get(msg.to)!.send(
+      if (msg.type === "join" && msg.to && clients.has(msg.to)) {
+        const host = clients.get(msg.to)!;
+        host.send(
           JSON.stringify({
-            ...msg,
+            type: "peer-joined",
             from,
           }),
         );
+        return;
       }
+
+      if (!msg.to || !clients.has(msg.to)) {
+        console.log("no target found for", msg.type, "from", from);
+        return;
+      }
+
+      const target = clients.get(msg.to)!;
+      target.send(
+        JSON.stringify({
+          ...msg,
+          from,
+        }),
+      );
     },
 
     close(ws) {
-      clients.delete(ws.data.id);
+      clients.delete(ws.id);
     },
   })
   .listen(3000);
