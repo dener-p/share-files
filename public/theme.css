@@ -1,0 +1,1619 @@
+:root {
+  --bg: #0c0e12;
+  --panel: #141720;
+  --panel-hover: #191d29;
+  --panel-input: #1a1e2a;
+  --border: #232838;
+  --border-focus: #4f8cff;
+  --text: #e6e9f0;
+  --muted: #8b93a7;
+  --accent: #4f8cff;
+  --accent-hover: #679dff;
+  --ok: #3ecf8e;
+  --ok-bg: rgba(62, 207, 142, 0.1);
+  --warn: #f5a524;
+  --warn-bg: rgba(245, 165, 36, 0.1);
+  --bad: #ff5c5c;
+  --bad-bg: rgba(255, 92, 92, 0.1);
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Respect the `hidden` attribute even when a class sets its own display
+   (e.g. .controls-group is display:flex). Without this, role-based hiding
+   such as the streamer controls on the viewer page has no effect. */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14.5px/1.5 var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+header, main {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+header {
+  padding-top: 24px;
+  margin-bottom: 16px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.header-titles {
+  flex: 1;
+  min-width: 240px;
+}
+
+h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 13.5px;
+  margin: 4px 0 0;
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.badge::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 7px var(--ok);
+}
+
+/* Header actions (language picker + role badge) */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lang-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238b93a7' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 5px 27px 5px 10px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lang-select:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.lang-select:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(79, 140, 255, 0.2);
+}
+
+.lang-select option {
+  background: var(--panel-input);
+  color: var(--text);
+}
+
+/* Controls Bar */
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+.controls-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Buttons */
+button {
+  background: var(--panel-input);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.btn-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+button:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: #222736;
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(79, 140, 255, 0.25);
+}
+
+button.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.35);
+}
+
+button.danger {
+  color: var(--bad);
+  border-color: rgba(255, 92, 92, 0.25);
+  background: rgba(255, 92, 92, 0.05);
+}
+
+button.danger:hover:not(:disabled) {
+  background: rgba(255, 92, 92, 0.15);
+  border-color: var(--bad);
+}
+
+button.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted);
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+button.btn-ghost:hover:not(:disabled) {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+button.copied {
+  border-color: var(--ok) !important;
+  color: var(--ok) !important;
+  background: var(--ok-bg) !important;
+}
+
+/* Checkbox Pills */
+.check-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 6px 11px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--muted);
+  transition: all 0.15s ease;
+}
+
+.check-pill:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text);
+}
+
+.check-pill:has(input:checked) {
+  background: rgba(79, 140, 255, 0.08);
+  border-color: rgba(79, 140, 255, 0.35);
+  color: var(--text);
+}
+
+.check-pill input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* Select Fields (Quality, FPS, Peer) */
+.select-field {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 2px 2px 2px 9px;
+  gap: 6px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.select-field:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.select-field:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(79, 140, 255, 0.2);
+}
+
+.select-field > label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  user-select: none;
+}
+
+.select-field select,
+select {
+  background: var(--panel-input);
+  color: var(--text);
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 5px 26px 5px 9px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%238b93a7' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  outline: none;
+}
+
+.select-field select:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.select-field select option {
+  background: #181b24;
+  color: var(--text);
+  padding: 8px;
+}
+
+.peer-field {
+  padding: 1px;
+}
+
+.peer-field select {
+  padding: 4px 24px 4px 8px;
+  font-size: 12px;
+}
+
+/* Text Fields (Room ID) */
+.text-field {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 2px 2px 2px 9px;
+  gap: 6px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.text-field:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.text-field:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(79, 140, 255, 0.2);
+}
+
+.text-field > label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  user-select: none;
+}
+
+.text-field input {
+  background: var(--panel-input);
+  color: var(--text);
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 5px 9px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  width: 120px;
+  min-width: 0;
+  outline: none;
+}
+
+.text-field input::placeholder {
+  color: var(--muted);
+}
+
+.text-field input:disabled {
+  opacity: 0.5;
+}
+
+/* A PIN is only a few digits, so it needs less room than a room ID. */
+.pin-field input {
+  width: 84px;
+  letter-spacing: 0.15em;
+}
+
+.text-field button {
+  padding: 5px 7px;
+  border-radius: 5px;
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted);
+}
+
+.text-field button:hover:not(:disabled) {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Link Row */
+.link-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  background: rgba(79, 140, 255, 0.05);
+  border: 1px solid rgba(79, 140, 255, 0.25);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+}
+
+.link-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.link-row input {
+  flex: 1;
+  min-width: 200px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 11px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.link-row input:focus {
+  border-color: var(--accent);
+}
+
+/* Audio Hint for Viewer */
+.audio-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(245, 165, 36, 0.1);
+  border: 1px solid rgba(245, 165, 36, 0.35);
+  color: var(--warn);
+  padding: 8px 14px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  font-size: 13.5px;
+}
+
+.audio-hint button {
+  background: var(--warn);
+  border-color: var(--warn);
+  color: #000;
+  font-weight: 600;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.audio-hint button:hover {
+  opacity: 0.9;
+}
+
+/* Viewer volume control (mute toggle + slider + percentage) */
+.volume-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.volume-bar button {
+  padding: 5px 7px;
+}
+
+.volume-slider {
+  flex: 1;
+  min-width: 120px;
+  max-width: 260px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.volume-pct {
+  min-width: 36px;
+  text-align: right;
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Alert */
+.alert {
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  border: 1px solid;
+  font-size: 13.5px;
+}
+
+/* Handoff prompt: an alert with an answer, not just a message. */
+.handoff-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.alert.warn {
+  color: var(--warn);
+  border-color: rgba(245, 165, 36, 0.4);
+  background: var(--warn-bg);
+}
+
+.alert.bad {
+  color: var(--bad);
+  border-color: rgba(255, 92, 92, 0.4);
+  background: var(--bad-bg);
+}
+
+.alert.ok {
+  color: var(--ok);
+  border-color: rgba(62, 207, 142, 0.4);
+  background: var(--ok-bg);
+}
+
+/* Video overlay control (theater mode) */
+.overlay-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 4;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.5);
+  color: #e6e9f0;
+  opacity: 0.5;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.overlay-btn:hover,
+button.overlay-btn:hover:not(:disabled) {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.78);
+}
+
+.video-wrap:hover .overlay-btn,
+.overlay-btn:focus-visible {
+  opacity: 1;
+}
+
+/* Video Wrap & Placeholder */
+.video-wrap {
+  position: relative;
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+video {
+  display: block;
+  width: 100%;
+  max-height: 60vh;
+  background: #000;
+}
+
+.video-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 24px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.placeholder-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--muted);
+  opacity: 0.5;
+}
+
+.placeholder-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.video-placeholder p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Panels */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+h2 {
+  font-size: 12px;
+  margin: 0;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+}
+
+/* Diagnostics DL */
+dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 5px 18px;
+  margin: 0;
+  font-size: 13.5px;
+}
+
+dt {
+  color: var(--muted);
+  align-self: center;
+}
+
+dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  word-break: break-word;
+  align-self: center;
+}
+
+dd.ok {
+  color: var(--ok);
+  font-weight: 500;
+}
+
+dd.warn {
+  color: var(--warn);
+}
+
+dd.bad {
+  color: var(--bad);
+  font-weight: 500;
+}
+
+/* Log */
+pre {
+  margin: 0;
+  max-height: 240px;
+  overflow: auto;
+  font: 12px/1.55 var(--font-mono);
+  white-space: pre-wrap;
+  color: #c9d1d9;
+}
+
+pre::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+pre::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+pre .warn {
+  color: var(--warn);
+}
+
+pre .bad {
+  color: var(--bad);
+}
+
+pre .ok {
+  color: var(--ok);
+}
+
+/* Landing page (/) */
+.home {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.home-card {
+  display: block;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+a.home-card:hover {
+  border-color: var(--accent);
+  background: var(--panel-hover);
+  transform: translateY(-1px);
+}
+
+.home-icon {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--panel-input);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+
+.home-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.home-card h2 {
+  font-size: 16px;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: 0;
+  margin: 0 0 6px;
+}
+
+.home-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.home-card .watch-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.home-card .watch-form input {
+  flex: 1;
+  min-width: 0;
+  background: var(--panel-input);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 11px;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  outline: none;
+}
+
+.home-card .watch-form input::placeholder {
+  color: var(--muted);
+}
+
+.home-card .watch-form input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(79, 140, 255, 0.2);
+}
+
+.home-card .watch-form button {
+  flex-shrink: 0;
+}
+
+.home-note {
+  margin-top: 14px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+/* Log header: group the collapse toggle and Clear buttons. */
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* QR modal (desktop-to-phone handoff) */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  width: min(360px, 100%);
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.modal h2 {
+  font-size: 14px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.qr-box {
+  display: flex;
+  justify-content: center;
+  background: #fff;
+  border-radius: 10px;
+  padding: 8px;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.qr-box svg {
+  display: block;
+  width: min(256px, 70vw);
+  height: auto;
+}
+
+.qr-hint {
+  margin: 12px 0 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.qr-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Footer: repository + bug report */
+.site-footer {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 22px 16px 40px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.icon-btn:hover,
+button.icon-btn:hover:not(:disabled) {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--panel-hover);
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* Bug report modal (shared by the app and the landing page) */
+.report-modal {
+  width: min(460px, 100%);
+  text-align: left;
+}
+
+.report-text {
+  box-sizing: border-box;
+  width: 100%;
+  height: 168px;
+  margin-bottom: 14px;
+  padding: 10px;
+  resize: vertical;
+  font: 12px/1.45 var(--font-mono);
+  color: var(--text);
+  background: var(--panel-input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.report-row {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.report-row + .report-row {
+  margin-top: 8px;
+}
+
+a.report-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+a.report-link:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Landing page: "how it works" / "what it needs" */
+.home-info {
+  margin-top: 14px;
+}
+
+.info-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.info-card h2 {
+  font-size: 12px;
+  margin: 0 0 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+}
+
+.info-card ol,
+.info-card ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.info-card li + li {
+  margin-top: 6px;
+}
+
+/* Theater mode: drop the chrome so the rooms fill the window */
+body.theater .site-header,
+body.theater .add-bar,
+body.theater .site-footer,
+body.theater .shell-panel {
+  display: none !important;
+}
+
+body.theater main.workspace {
+  max-width: none;
+  padding: 0;
+  margin: 0;
+}
+
+body.theater #grid {
+  min-height: 100vh;
+}
+
+/* Keep panel internals normal in theater (the old single-room rules below no
+   longer apply to a grid of rooms). */
+body.theater .room-panel .video-wrap {
+  height: auto;
+  min-height: 96px;
+  border-radius: 0;
+}
+
+body.theater .room-panel .alert,
+body.theater .room-panel .audio-hint,
+body.theater .room-panel .volume-bar {
+  position: static;
+  transform: none;
+  width: auto;
+  max-width: none;
+  margin: 0 0 8px;
+  box-shadow: none;
+}
+
+/* ---------- Squad console (multistream) ---------- */
+
+/* The console lays out several embedded viewers, so it gets a wider shell than
+   the single-room pages. */
+.squad-page header,
+.squad-page main {
+  max-width: 1440px;
+}
+
+.squad-page main {
+  padding-bottom: 32px;
+}
+
+.squad-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.squad-add input {
+  flex: 1 1 260px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel-input);
+  color: var(--text);
+  font: inherit;
+}
+
+.squad-add input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.squad-add input::placeholder {
+  color: var(--muted);
+}
+
+.squad-note {
+  margin: 0 0 16px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.squad-error {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: var(--bad);
+}
+
+.squad-empty {
+  margin: 28px 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.squad-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.squad-tile {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.squad-tile.is-audio {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.squad-tile:fullscreen {
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+}
+
+.squad-frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.squad-tile-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: linear-gradient(rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0));
+  pointer-events: none;
+}
+
+.squad-tile-bar > * {
+  pointer-events: auto;
+}
+
+.squad-tile-name {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #fff;
+}
+
+.squad-tile-state {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.squad-tile-state.live {
+  color: var(--ok);
+}
+
+.squad-tile-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.squad-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: rgba(20, 23, 32, 0.72);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.squad-btn:hover {
+  background: rgba(20, 23, 32, 0.95);
+  color: #fff;
+}
+
+.squad-btn svg {
+  display: block;
+}
+
+a.squad-btn {
+  text-decoration: none;
+}
+
+.squad-remove:hover {
+  color: var(--bad);
+}
+
+.squad-tile.is-live .squad-tile-name::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+  vertical-align: middle;
+}
+
+/* Embed mode (?embed=1): the single-room page rendered as one tile inside the
+   console. An inline head script adds the class before first paint, so the
+   chrome never flashes. The parent frame owns audio, so the volume bar and
+   unmute hint stay hidden. */
+html.embed,
+html.embed body {
+  overflow: hidden;
+}
+
+html.embed main {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+html.embed header,
+html.embed .controls,
+html.embed .link-row,
+html.embed .panel,
+html.embed .site-footer,
+html.embed .audio-hint,
+html.embed .volume-bar,
+html.embed .overlay-btn {
+  display: none !important;
+}
+
+html.embed .video-wrap {
+  height: 100vh;
+  min-height: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+html.embed video {
+  width: 100%;
+  height: 100vh;
+  max-height: none;
+  object-fit: contain;
+}
+
+html.embed .alert,
+html.embed #handoffPrompt {
+  position: fixed;
+  left: 50%;
+  top: 10px;
+  z-index: 6;
+  width: max-content;
+  max-width: calc(100vw - 20px);
+  margin: 0;
+  transform: translateX(-50%);
+}
+
+html.embed #handoffPrompt {
+  top: 58px;
+}
+
+/* Viewer PIN gate: covers the player until the room's PIN is entered, so it
+   replaces the "waiting" placeholder instead of stacking above it. */
+.pin-gate {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+}
+
+.pin-form {
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+}
+
+.pin-form h2 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.pin-hint {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.pin-row {
+  display: flex;
+  gap: 8px;
+}
+
+.pin-row input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-input);
+  color: var(--text);
+  font: inherit;
+  letter-spacing: 0.3em;
+  text-align: center;
+}
+
+.pin-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.pin-error {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  color: var(--bad);
+}
+
+/* ==========================================================================
+   Unified shell: one page, many rooms, free-form resizable panels.
+   ========================================================================== */
+
+.site-header {
+  max-width: none;
+  margin: 0;
+  padding: 14px 16px 10px;
+}
+
+.site-header .header-content {
+  max-width: none;
+}
+
+.brand {
+  text-decoration: none;
+  color: inherit;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+main.workspace {
+  max-width: none;
+  margin: 0;
+  padding: 0 16px 14px;
+}
+
+/* Add-room bar */
+.add-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 0 16px 12px;
+}
+
+.add-bar input {
+  flex: 1;
+  max-width: 420px;
+}
+
+/* The grid of columns; splitters sit between them as flex items. */
+#grid {
+  display: flex;
+  align-items: stretch;
+  min-height: 62vh;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.split {
+  position: relative;
+  flex: 0 0 12px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.split-h {
+  cursor: row-resize;
+}
+
+.split::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  background: var(--border);
+  border-radius: 3px;
+  transition: background 0.12s ease;
+}
+
+.split-v::after {
+  width: 3px;
+  height: 46%;
+}
+
+.split-h::after {
+  height: 3px;
+  width: 46%;
+}
+
+.split:hover::after,
+.split:active::after {
+  background: var(--accent);
+}
+
+/* Room panel */
+.room-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.room-panel.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.room-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border);
+  flex: 0 0 auto;
+}
+
+.room-name {
+  font-weight: 700;
+  font-size: 12.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.room-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.room-badge.live {
+  color: #7ee0a4;
+  border-color: rgba(126, 224, 164, 0.4);
+}
+
+.room-badge.waiting {
+  color: var(--warn);
+  border-color: rgba(245, 165, 36, 0.4);
+}
+
+.room-bar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.audio-btn.on {
+  color: var(--accent);
+}
+
+.room-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  overflow: auto;
+}
+
+/* Video owns the panel body. */
+.room-panel .video-wrap {
+  flex: 1 1 auto;
+  min-height: 110px;
+  margin: 0;
+}
+
+.room-panel video {
+  max-height: none;
+  height: 100%;
+  object-fit: contain;
+}
+
+.room-panel .volume-bar {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  margin: 0;
+  background: rgba(20, 23, 32, 0.86);
+  backdrop-filter: blur(6px);
+}
+
+/* Host controls live inside the panel. */
+.room-controls,
+.room-viewer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: flex-end;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.room-controls .controls-group,
+.room-viewer-controls .controls-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: flex-end;
+}
+
+.room-controls .select-field,
+.room-controls .text-field {
+  min-width: 0;
+}
+
+.room-controls .peer-field select {
+  max-width: 220px;
+}
+
+.room-alert,
+.room-handoff {
+  margin: 0;
+}
+
+.room-handoff {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.handoff-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 62vh;
+  color: var(--muted);
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.diag-target {
+  color: var(--muted);
+  font-size: 12.5px;
+  margin-left: 10px;
+  flex: 1;
+}
+
+#log {
+  max-height: 220px;
+}
+
+@media (max-width: 720px) {
+  #grid {
+    flex-direction: column;
+  }
+
+  .split-v {
+    display: none;
+  }
+
+  .col {
+    flex: 0 0 auto !important;
+  }
+
+  .room-panel {
+    min-height: 46vh;
+  }
+}
+

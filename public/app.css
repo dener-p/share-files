@@ -1,0 +1,160 @@
+/* Share Files: component styles layered on top of theme.css.
+   Everything here reuses the tokens defined in theme.css (:root). */
+
+/* Small helper for muted inline text. */
+.muted {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+/* Connection-state badge. The base .badge in theme.css always shows the green
+   "ok" dot; here we recolour it per state. */
+.badge.waiting::before {
+  background: var(--warn);
+  box-shadow: 0 0 7px var(--warn);
+}
+
+.badge.connecting::before {
+  background: var(--accent);
+  box-shadow: 0 0 7px var(--accent);
+}
+
+.badge.idle::before {
+  background: var(--muted);
+  box-shadow: none;
+}
+
+/* Drop target for the sender. */
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--muted);
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.dropzone:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text);
+}
+
+.dropzone.drag {
+  border-color: var(--accent);
+  background: rgba(79, 140, 255, 0.08);
+  color: var(--text);
+}
+
+.dropzone-icon {
+  display: inline-flex;
+  color: var(--accent);
+}
+
+.dropzone-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.dropzone-text {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+/* File list, shared by the sender (queued) and receiver (incoming). */
+.file-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: var(--panel-input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.file-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-size {
+  font-size: 11.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.file-state {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.file-state.ok { color: var(--ok); }
+.file-state.bad { color: var(--bad); }
+
+.file-download {
+  color: var(--accent);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.file-download:hover { text-decoration: underline; }
+
+.file-remove {
+  padding: 3px 7px;
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.file-remove:hover:not(:disabled) {
+  color: var(--bad);
+  background: rgba(255, 92, 92, 0.1);
+}
+
+/* Transfer progress bar. */
+.progress {
+  position: relative;
+  height: 6px;
+  margin-top: 12px;
+  border-radius: 999px;
+  background: var(--panel-input);
+  overflow: hidden;
+}
+
+.progress > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.15s linear;
+}
