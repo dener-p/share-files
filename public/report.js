@@ -14,6 +14,9 @@
 
   const GITHUB_ISSUES = `${GITHUB_REPO}/issues/new`;
 
+  // Translation helper; strings live in /i18n.js.
+  const tr = (key, vars) => (window.I18N ? window.I18N.t(key, vars) : key);
+
   // The deployed version is injected into <meta name="share-version"> by the
   // Worker from the APP_VERSION var in wrangler.jsonc.
   function appVersion() {
@@ -53,6 +56,7 @@
   let backdrop = null;
   let reportEl = null;
   let lastFocus = null;
+  const refs = {};
 
   function ghostButton(label, act) {
     const b = document.createElement("button");
@@ -61,6 +65,18 @@
     b.textContent = label;
     b.dataset.act = act;
     return b;
+  }
+
+  // Re-translate the modal when the language changes (and while it is open).
+  function retranslate() {
+    if (!backdrop) return;
+    refs.title.textContent = tr("report.title");
+    refs.hint.textContent = tr("report.hint", { handle: DISCORD_HANDLE });
+    refs.reportEl.setAttribute("aria-label", tr("report.aria"));
+    refs.copyReport.textContent = tr("report.copyReport");
+    refs.copyHandle.textContent = tr("report.copyHandle", { handle: DISCORD_HANDLE });
+    refs.openIssue.textContent = tr("report.openIssue");
+    refs.close.textContent = tr("report.close");
   }
 
   function buildModal() {
@@ -78,35 +94,43 @@
 
     const title = document.createElement("h2");
     title.id = "reportTitle";
-    title.textContent = "Report a bug";
+    title.textContent = tr("report.title");
+    refs.title = title;
 
     const hint = document.createElement("p");
     hint.className = "qr-hint";
-    hint.textContent = `Copy this report and send it to @${DISCORD_HANDLE} on Discord, or open an issue.`;
+    hint.textContent = tr("report.hint", { handle: DISCORD_HANDLE });
+    refs.hint = hint;
 
     reportEl = document.createElement("textarea");
     reportEl.className = "report-text";
     reportEl.readOnly = true;
     reportEl.spellcheck = false;
-    reportEl.setAttribute("aria-label", "Bug report");
+    reportEl.setAttribute("aria-label", tr("report.aria"));
+    refs.reportEl = reportEl;
 
     const row1 = document.createElement("div");
     row1.className = "qr-actions report-row";
-    row1.append(
-      ghostButton("Copy report", "copy-report"),
-      ghostButton(`Copy @${DISCORD_HANDLE}`, "copy-handle"),
-    );
+    const copyReport = ghostButton(tr("report.copyReport"), "copy-report");
+    const copyHandle = ghostButton(tr("report.copyHandle", { handle: DISCORD_HANDLE }), "copy-handle");
+    refs.copyReport = copyReport;
+    refs.copyHandle = copyHandle;
+    row1.append(copyReport, copyHandle);
 
     const issues = document.createElement("a");
     issues.className = "btn-ghost report-link";
     issues.href = GITHUB_ISSUES;
     issues.target = "_blank";
     issues.rel = "noopener noreferrer";
-    issues.textContent = "Open an issue";
+    issues.textContent = tr("report.openIssue");
+    refs.openIssue = issues;
+
+    const closeBtn = ghostButton(tr("report.close"), "close");
+    refs.close = closeBtn;
 
     const row2 = document.createElement("div");
     row2.className = "qr-actions report-row";
-    row2.append(issues, ghostButton("Close", "close"));
+    row2.append(issues, closeBtn);
 
     box.append(title, hint, reportEl, row1, row2);
     backdrop.append(box);
@@ -127,7 +151,7 @@
         return;
       }
       const previous = el.textContent;
-      el.textContent = "Copied";
+      el.textContent = tr("report.copied");
       el.classList.add("copied");
       setTimeout(() => {
         el.textContent = previous;
@@ -137,6 +161,7 @@
 
     backdrop.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !backdrop.hidden) close(); });
+    document.addEventListener("i18n:change", retranslate);
     return backdrop;
   }
 
